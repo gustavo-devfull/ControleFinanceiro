@@ -1,24 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
-const defaultCategories = [
-  { id: 'food', name: 'Alimentação', color: '#ff6b6b', icon: '🍽️' },
-  { id: 'transport', name: 'Transporte', color: '#4ecdc4', icon: '🚗' },
-  { id: 'entertainment', name: 'Entretenimento', color: '#45b7d1', icon: '🎬' },
-  { id: 'shopping', name: 'Compras', color: '#f9ca24', icon: '🛍️' },
-  { id: 'health', name: 'Saúde', color: '#6c5ce7', icon: '🏥' },
-  { id: 'education', name: 'Educação', color: '#a29bfe', icon: '📚' },
-  { id: 'bills', name: 'Contas', color: '#fd79a8', icon: '📄' },
-  { id: 'other', name: 'Outros', color: '#636e72', icon: '📦' },
-  { id: 'farmacia', name: 'Farmácia', color: '#a29bfe', icon: '🏥' },
-  { id: 'gas', name: 'Gasolina', color: '#fd79a8', icon: '📄' },
-  { id: 'vest', name: 'Vestuário', color: '#636e72', icon: '📦' }
-];
-
 export function useBudget() {
   const [data, setData] = useState({
     transactions: [],
-    categories: defaultCategories,
+    categories: [],
     goals: [],
     monthlyBudget: 0
   });
@@ -43,7 +29,7 @@ export function useBudget() {
         .select('*')
         .order('created_at', { ascending: false });
       if (goalsError) throw goalsError;
-      
+
       const { data: settingsData, error: settingsError } = await supabase
         .from('settings')
         .select('monthly_budget')
@@ -55,7 +41,7 @@ export function useBudget() {
 
       setData({
         transactions: transactionsData.map(t => ({...t, category: t.category_id })),
-        categories: categoriesData.length > 0 ? categoriesData : defaultCategories,
+        categories: categoriesData,
         goals: goalsData,
         monthlyBudget: settingsData?.monthly_budget || 0
       });
@@ -117,7 +103,7 @@ export function useBudget() {
       ...goal,
       createdAt: new Date().toISOString()
     };
-    
+
     const { data: insertedGoal, error } = await supabase
       .from('goals')
       .insert([newGoal])
@@ -177,7 +163,7 @@ export function useBudget() {
       .from('settings')
       .update({ monthly_budget: budget })
       .eq('id', 1);
-      
+
     if (error) {
         const { error: insertError } = await supabase
             .from('settings')
@@ -255,7 +241,7 @@ export function useBudget() {
 
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
-  
+
   const currentMonthTransactions = data.transactions.filter(t => {
     const date = new Date(t.date);
     return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
@@ -275,7 +261,7 @@ export function useBudget() {
     const categoryExpenses = currentMonthTransactions
       .filter(t => t.type === 'expense' && t.category === category.id)
       .reduce((sum, t) => sum + t.amount, 0);
-    
+
     return {
       ...category,
       amount: categoryExpenses,

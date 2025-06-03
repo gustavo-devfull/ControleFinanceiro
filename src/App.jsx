@@ -77,7 +77,7 @@ function App() {
           transition={{ duration: 0.6 }}
           className="text-center mb-8"
         >
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 pt-8">
             <span className="gradient-bg bg-clip-text text-white p-5 rounded-xl mb-6">
               Controle Financeiro
             </span>
@@ -211,7 +211,7 @@ function App() {
                     ))}
                   </div>
                   <div className="mt-2 flex items-center justify-between">
-                    <p className="text-xs text-white/50">Estas são as categorias padrão.</p>
+                    <p className="text-xs text-white/50">Estas são as categorias cadastradas.</p>
                     <Button
                       variant="outline"
                       className="text-sm border-white/20 text-white hover:bg-white/10"
