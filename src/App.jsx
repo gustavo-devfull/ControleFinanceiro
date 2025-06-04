@@ -1,10 +1,8 @@
-import React, { useEffect } from 'react';
+// App.jsx
+import React, { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Toaster } from '@/components/ui/toaster';
 import { Dashboard } from '@/components/Dashboard';
-import { TransactionForm } from '@/components/TransactionForm';
-import { TransactionList } from '@/components/TransactionList';
-import { ExpenseChart } from '@/components/ExpenseChart';
 import { GoalForm } from '@/components/GoalForm';
 import { GoalCard } from '@/components/GoalCard';
 import { useBudget } from '@/hooks/useBudget';
@@ -15,6 +13,8 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import CategoryManager from '@/components/CategoryManager';
+import OverviewTab from '@/components/tabs/OverviewTab';
+import TransactionsTab from '@/components/tabs/TransactionsTab';
 
 function App() {
   const {
@@ -22,6 +22,7 @@ function App() {
     loading,
     addTransaction,
     deleteTransaction,
+    updateTransaction,
     addGoal,
     updateGoal,
     deleteGoal,
@@ -29,14 +30,12 @@ function App() {
     totalIncome,
     totalExpenses,
     balance,
-    expensesByCategory,
-    currentMonthTransactions,
-    fetchData
+    expensesByCategory
   } = useBudget();
 
   const { toast } = useToast();
-  const [newMonthlyBudget, setNewMonthlyBudget] = React.useState('');
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = React.useState(false);
+  const [newMonthlyBudget, setNewMonthlyBudget] = useState('');
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   useEffect(() => {
     setNewMonthlyBudget(data.monthlyBudget > 0 ? data.monthlyBudget.toString() : '');
@@ -120,28 +119,20 @@ function App() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ExpenseChart data={expensesByCategory} />
-              <TransactionList
-                transactions={currentMonthTransactions}
-                categories={data.categories}
-                onDelete={deleteTransaction}
-              />
-            </div>
+            <OverviewTab
+              transactions={data.transactions}
+              categories={data.categories}
+              expensesByCategory={expensesByCategory}
+            />
           </TabsContent>
 
           <TabsContent value="transactions" className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
-              <h2 className="text-2xl font-bold text-white">Gerenciar Transações</h2>
-              <TransactionForm
-                categories={data.categories}
-                onAddTransaction={addTransaction}
-              />
-            </div>
-            <TransactionList
-              transactions={currentMonthTransactions}
+            <TransactionsTab
+              transactions={data.transactions}
               categories={data.categories}
-              onDelete={deleteTransaction}
+              onAddTransaction={addTransaction}
+              onDeleteTransaction={deleteTransaction}
+              onUpdateTransaction={updateTransaction}
             />
           </TabsContent>
 
@@ -211,7 +202,7 @@ function App() {
                     ))}
                   </div>
                   <div className="mt-2 flex items-center justify-between">
-                    <p className="text-xs text-white/50">Estas são as categorias cadastradas.</p>
+                    <p className="text-xs text-white/50">Estas são as categorias padrão.</p>
                     <Button
                       variant="outline"
                       className="text-sm border-white/20 text-white hover:bg-white/10"
